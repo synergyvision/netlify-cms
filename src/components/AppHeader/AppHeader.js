@@ -15,8 +15,6 @@ export default class AppHeader extends React.Component {
   static propTypes = {
     user: ImmutablePropTypes.map.isRequired,
     collections: ImmutablePropTypes.orderedMap.isRequired,
-    commands: PropTypes.array.isRequired, // eslint-disable-line
-    defaultCommands: PropTypes.array.isRequired, // eslint-disable-line
     runCommand: PropTypes.func.isRequired,
     toggleDrawer: PropTypes.func.isRequired,
     onCreateEntryClick: PropTypes.func.isRequired,
@@ -47,27 +45,14 @@ export default class AppHeader extends React.Component {
     });
   };
 
-  handleRightIconClick = () => {
-    this.setState({
-      userMenuActive: !this.state.userMenuActive,
-    });
-  };
-
   render() {
     const {
       user,
       collections,
-      commands,
-      defaultCommands,
       runCommand,
       toggleDrawer,
       onLogoutClick,
     } = this.props;
-
-    const {
-      createMenuActive,
-      userMenuActive,
-    } = this.state;
 
     const avatarStyle = {
       backgroundColor: `#${ stringToRGB(user.get("name")) }`,
@@ -78,37 +63,15 @@ export default class AppHeader extends React.Component {
         fixed
         theme={styles}
         leftIcon="menu"
-        rightIcon={
-          <div>
-            <Avatar
-              style={avatarStyle}
-              title={user.get("name")}
-              image={user.get("avatar_url")}
-            />
-            <Menu
-              active={userMenuActive}
-              position="topRight"
-              onHide={this.handleRightIconClick}
-            >
-              <MenuItem onClick={onLogoutClick}>Log out</MenuItem>
-            </Menu>
-          </div>
-        }
         onLeftIconClick={toggleDrawer}
         onRightIconClick={this.handleRightIconClick}
       >
-        <IndexLink to="/">
-          <FontIcon value="home" />
+        <IndexLink to="/" className={styles.homeLink}>
+          <FontIcon value="home" className={styles.icon} />
         </IndexLink>
-
-        <FindBar
-          commands={commands}
-          defaultCommands={defaultCommands}
-          runCommand={runCommand}
-        />
         <IconMenu
           theme={styles}
-          icon="create"
+          icon="add"
           onClick={this.handleCreateButtonClick}
           onHide={this.handleCreateMenuHide}
         >
@@ -122,6 +85,11 @@ export default class AppHeader extends React.Component {
               />
             )
           }
+        </IconMenu>
+        <FindBar runCommand={runCommand} />
+        <Avatar style={avatarStyle} title={user.get("name")} image={user.get("avatar_url")} />
+        <IconMenu icon="settings" position="topRight" theme={styles}>
+          <MenuItem onClick={onLogoutClick} value="log out" caption="Log Out" />
         </IconMenu>
       </AppBar>
     );

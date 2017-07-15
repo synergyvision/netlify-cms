@@ -3,8 +3,11 @@ import { DragSource, DropTarget, HTML5DragDrop } from 'react-simple-dnd';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { Link } from 'react-router';
 import moment from 'moment';
+import pluralize from 'pluralize';
+import { capitalize } from 'lodash'
 import { Card, CardTitle, CardText, CardActions } from 'react-toolbox/lib/card';
 import Button from 'react-toolbox/lib/button';
+import UnpublishedListingCardMeta from './UnpublishedListingCardMeta.js';
 import { status, statusDescriptions } from '../../constants/publishModes';
 import styles from './UnpublishedListing.css';
 
@@ -13,6 +16,7 @@ class UnpublishedListing extends React.Component {
     entries: ImmutablePropTypes.orderedMap,
     handleChangeStatus: PropTypes.func.isRequired,
     handlePublish: PropTypes.func.isRequired,
+    handleDelete: PropTypes.func.isRequired,
   };
 
   handleChangeStatus = (newStatus, dragProps) => {
@@ -22,6 +26,11 @@ class UnpublishedListing extends React.Component {
     this.props.handleChangeStatus(collection, slug, oldStatus, newStatus);
   };
 
+  requestDelete = (collection, slug, ownStatus) => {
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      this.props.handleDelete(collection, slug, ownStatus);
+    }
+  };
   requestPublish = (collection, slug, ownStatus) => {
     if (ownStatus !== status.last()) return;
     if (window.confirm('Are you sure you want to publish this entry?')) {
@@ -62,6 +71,7 @@ class UnpublishedListing extends React.Component {
             const slug = entry.get('slug');
             const ownStatus = entry.getIn(['metaData', 'status']);
             const collection = entry.getIn(['metaData', 'collection']);
+            const isModification = entry.get('isModification');
             return (
               <DragSource
                 key={slug}
@@ -71,9 +81,14 @@ class UnpublishedListing extends React.Component {
               >
                 <div className={styles.draggable}>
                   <Card className={styles.card}>
+                    <UnpublishedListingCardMeta
+                      meta={capitalize(pluralize(collection))}
+                      label={isModification ? "" : "New"}
+                    />
                     <CardTitle
                       title={entry.getIn(['data', 'title'])}
                       subtitle={`by ${ author }`}
+                      className={styles.cardTitle}
                     />
                     <CardText>
                       Last updated: {timeStamp} by {entry.getIn(['metaData', 'user'])}
@@ -82,6 +97,10 @@ class UnpublishedListing extends React.Component {
                       <Link to={link}>
                         <Button>Edit</Button>
                       </Link>
+                      <Button
+                      onClick={this.requestDelete.bind(this, collection, slug, ownStatus)}>
+                        Delete
+                      </Button>
                       {
                         (ownStatus === status.last() && !entry.get('isPersisting', false)) &&
                         <Button

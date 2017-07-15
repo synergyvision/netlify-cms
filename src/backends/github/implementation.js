@@ -1,6 +1,7 @@
 import semaphore from "semaphore";
 import AuthenticationPage from "./AuthenticationPage";
 import API from "./API";
+import { fileExtension } from '../../lib/pathHelper'
 
 const MAX_CONCURRENT_DOWNLOADS = 10;
 
@@ -39,8 +40,9 @@ export default class GitHub {
     return Promise.resolve(this.token);
   }
 
-  entriesByFolder(collection) {
+  entriesByFolder(collection, extension) {
     return this.api.listFiles(collection.get("folder"))
+    .then(files => files.filter(file => fileExtension(file.name) === extension))
     .then(this.fetchFiles);
   }
 
@@ -99,6 +101,7 @@ export default class GitHub {
                 file: { path },
                 data: data.fileData,
                 metaData: data.metaData,
+                isModification: data.isModification,
               });
               sem.leave();
             }
@@ -127,6 +130,7 @@ export default class GitHub {
         file: { path: data.metaData.objects.entry.path },
         data: data.fileData,
         metaData: data.metaData,
+        isModification: data.isModification,
       };
     });
   }
@@ -135,6 +139,9 @@ export default class GitHub {
     return this.api.updateUnpublishedEntryStatus(collection, slug, newStatus);
   }
 
+  deleteUnpublishedEntry(collection, slug) {
+    return this.api.deleteUnpublishedEntry(collection, slug);
+  }
   publishUnpublishedEntry(collection, slug) {
     return this.api.publishUnpublishedEntry(collection, slug);
   }

@@ -1,29 +1,41 @@
+@import "../UI/theme";
+
 .control {
-  color: #7c8382;
+  color: var(--textColor);
   position: relative;
   padding: 20px 0 10px 0;
+  margin-top: 16px;
 
   & input,
   & textarea,
   & select {
-    font-family: monospace;
+    font-family: 'SFMono-Regular', Consolas, "Liberation Mono", Menlo, Courier, monospace;
     display: block;
     width: 100%;
-    padding: 12px 0 10px 0;
+    padding: 12px;
     margin: 0;
-    border: none;
+    border: var(--textFieldBorder);
+    border-radius: var(--borderRadius);
     outline: 0;
     box-shadow: none;
-    background: 0 0;
-    font-size: 18px;
-    color: #7c8382;
+    background-color: var(--controlBGColor);
+    font-size: 16px;
+    color: var(--textColor);
+    transition: border-color .3s ease;
+
+    &:focus,
+    &:active {
+      border-color: var(--primaryColor);
+    }
   }
 }
 
 .label {
   display: block;
-  color: #AAB0AF;
+  color: var(--controlLabelColor);
   font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .labelWithError {
@@ -38,30 +50,6 @@
   margin-bottom: 5px;
 }
 
-.widget {
-  border-bottom: 1px solid #e8eae8;
-  position: relative;
-
-  &:after {
-    content: '';
-    position: absolute;
-    left: 42px;
-    bottom: -7px;
-    width: 12px;
-    height: 12px;
-    background-color: #f2f5f4;
-    -webkit-transform: rotate(45deg);
-    transform: rotate(45deg);
-    z-index: 1;
-    border-right: 1px solid #e8eae8;
-    border-bottom: 1px solid #e8eae8;
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:last-child:after {
-    display: none;
-  }
+p {
+  font-size: 16px;
 }

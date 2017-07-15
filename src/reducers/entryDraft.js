@@ -19,7 +19,13 @@ import {
   REMOVE_ASSET,
 } from '../actions/media';
 
-const initialState = Map({ entry: Map(), mediaFiles: List(), fieldsMetaData: Map(), fieldsErrors: Map() });
+const initialState = Map({
+  entry: Map(),
+  mediaFiles: List(),
+  fieldsMetaData: Map(),
+  fieldsErrors: Map(),
+  hasChanged: false,
+});
 
 const entryDraftReducer = (state = Map(), action) => {
   switch (action.type) {
@@ -31,6 +37,7 @@ const entryDraftReducer = (state = Map(), action) => {
         state.set('mediaFiles', List());
         state.set('fieldsMetaData', Map());
         state.set('fieldsErrors', Map());
+        state.set('hasChanged', false);
       });
     case DRAFT_CREATE_EMPTY:
       // New Entry
@@ -40,6 +47,7 @@ const entryDraftReducer = (state = Map(), action) => {
         state.set('mediaFiles', List());
         state.set('fieldsMetaData', Map());
         state.set('fieldsErrors', Map());
+        state.set('hasChanged', false);
       });
     case DRAFT_DISCARD:
       return initialState;
@@ -47,6 +55,7 @@ const entryDraftReducer = (state = Map(), action) => {
       return state.withMutations((state) => {
         state.setIn(['entry', 'data', action.payload.field], action.payload.value);
         state.mergeIn(['fieldsMetaData'], fromJS(action.payload.metadata));
+        state.set('hasChanged', true);
       });
     
     case DRAFT_VALIDATION_ERRORS:
@@ -61,12 +70,17 @@ const entryDraftReducer = (state = Map(), action) => {
       return state.setIn(['entry', 'isPersisting'], true);
     }
 
-    case ENTRY_PERSIST_SUCCESS:
     case ENTRY_PERSIST_FAILURE:
-    case UNPUBLISHED_ENTRY_PERSIST_SUCCESS:
     case UNPUBLISHED_ENTRY_PERSIST_FAILURE: {
       return state.deleteIn(['entry', 'isPersisting']);
     }
+
+    case ENTRY_PERSIST_SUCCESS:
+    case UNPUBLISHED_ENTRY_PERSIST_SUCCESS:
+      return state.withMutations((state) => {
+        state.deleteIn(['entry', 'isPersisting']);
+        state.set('hasChanged', false);
+      });
 
     case ADD_ASSET:
       return state.update('mediaFiles', list => list.push(action.payload.public_path));
